@@ -15,14 +15,17 @@ public class HttpServer {
         try (ServerSocket server = new ServerSocket(8080)) {
             while (true) {
                 Socket client = server.accept();
-                handle(client);
+                try(client) {
+                    handle(client);
+                }
             }
         }
     }
 
     private void handle(Socket client) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream())); OutputStream out = client.getOutputStream()) {
-
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream())); 
+            OutputStream out = client.getOutputStream();
             String requestLine = in.readLine();
             if (requestLine == null) {
                 return;
