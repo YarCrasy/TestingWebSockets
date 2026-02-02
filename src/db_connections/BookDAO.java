@@ -16,11 +16,10 @@ public class BookDAO {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM books";
 
-        try {
-            Connection c = getConnection(); 
+        try (Connection c = getConnection(); 
             PreparedStatement ps = c.prepareStatement(sql); 
-            ResultSet rs = ps.executeQuery();
-
+            ResultSet rs = ps.executeQuery()) {
+            
             while (rs.next()) {
                 Book b = new Book(
                     rs.getInt("id"),
@@ -31,18 +30,13 @@ public class BookDAO {
                 books.add(b);
             }
         }
-        catch (SQLException e) {
-            System.err.println("Error fetching books: " + e.getMessage());
-            throw e;
-        }
         return books;
     }
 
     public Book findById(int id) throws SQLException {
         String sql = "SELECT * FROM books WHERE id=?";
-        try {
-            Connection c = getConnection(); 
-            PreparedStatement ps = c.prepareStatement(sql);
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -55,18 +49,12 @@ public class BookDAO {
                 return b;
             }
         }
-        catch (SQLException e) {
-            System.err.println("Error fetching book by ID: " + e.getMessage());
-            throw e;
-        }
         return null;
     }
 
     public Book create(Book b) throws SQLException {
         String sql = "INSERT INTO books(title, author, year) VALUES (?,?,?)";
-        try {
-            Connection c = getConnection(); 
-            PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, b.title);
             ps.setString(2, b.author);
             ps.setInt(3, b.year);
@@ -76,41 +64,25 @@ public class BookDAO {
                 b.id = keys.getInt(1);
             }
         }
-        catch (SQLException e) {
-            System.err.println("Error creating book: " + e.getMessage());
-            throw e;
-        }
         return b;
     }
 
     public boolean update(int id, Book b) throws SQLException {
         String sql = "UPDATE books SET title=?, author=?, year=? WHERE id=?";
-        try {
-            Connection c = getConnection(); 
-            PreparedStatement ps = c.prepareStatement(sql);
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, b.title);
             ps.setString(2, b.author);
             ps.setInt(3, b.year);
             ps.setInt(4, id);
             return ps.executeUpdate() > 0;
         }
-        catch (SQLException e) {
-            System.err.println("Error updating book: " + e.getMessage());
-            throw e;
-        }
     }
 
     public boolean delete(int id) throws SQLException {
         String sql = "DELETE FROM books WHERE id=?";
-        try {
-            Connection c = getConnection(); 
-            PreparedStatement ps = c.prepareStatement(sql);
+        try (Connection c = getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        }
-        catch (SQLException e) {
-            System.err.println("Error deleting book: " + e.getMessage());
-            throw e;
         }
     }
 }
